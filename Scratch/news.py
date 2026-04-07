@@ -7,7 +7,7 @@ def parser(url):
     tree = ET.fromstring(response.content)
     items = tree.findall("./channel/item")
     for item in items:
-        pubdate= item.find("pubDate")
+        pubdate = item.find("pubDate")
         if pubdate is not None:
             pub_date = datetime.strptime(pubdate.text, "%a, %d %b %Y %H:%M:%S %z")
             today = datetime.now().date()
@@ -23,6 +23,7 @@ def main():
     parser("https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml")
     parser("https://rss.nytimes.com/services/xml/rss/nyt/Tennis.xml")
     parser("https://rss.nytimes.com/services/xml/rss/nyt/Health.xml")
+    parser("https://feeds.bbci.co.uk/sport/tennis/rss.xml")
 
 if __name__ == "__main__":
     main()

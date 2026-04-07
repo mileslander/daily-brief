@@ -12,17 +12,23 @@ from googleapiclient.errors import HttpError
 
 def parser():
     print("Getting Todays News")
-    urls = ["https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", "https://rss.nytimes.com/services/xml/rss/nyt/Tennis.xml", "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml"]
+    urls = ["https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", "https://rss.nytimes.com/services/xml/rss/nyt/Tennis.xml", "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml", "https://feeds.bbci.co.uk/sport/tennis/rss.xml"]
+    today = datetime.datetime.now().date()
+    yesterday = (datetime.datetime.now() - timedelta(days=1)).date()
+
     for url in urls:
       response = requests.get(url)
       tree = ET.fromstring(response.content)
       items = tree.findall("./channel/item")
+
       for item in items:
           pubdate= item.find("pubDate")
           if pubdate is not None:
-              pub_date = datetime.datetime.strptime(pubdate.text, "%a, %d %b %Y %H:%M:%S %z")
-              today = datetime.datetime.now().date()
-              yesterday = (datetime.datetime.now() - timedelta(days=1)).date()
+              if url == "https://feeds.bbci.co.uk/sport/tennis/rss.xml":
+                 pubdate = pubdate.text.replace(" GMT", " +0000")
+                 pub_date = datetime.datetime.strptime(pubdate, "%a, %d %b %Y %H:%M:%S %z")
+              else:
+                pub_date = datetime.datetime.strptime(pubdate.text, "%a, %d %b %Y %H:%M:%S %z")
               if pub_date.date() in [yesterday, today]:
                   description = item.find("description")
                   print(description.text)
