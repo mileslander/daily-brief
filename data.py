@@ -12,7 +12,7 @@ from googleapiclient.errors import HttpError
 
 def parser():
     print("Getting Todays News")
-    urls = ["https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", "https://rss.nytimes.com/services/xml/rss/nyt/Tennis.xml", "https://rss.nytimes.com/services/xml/rss/nyt/Health.xml", "https://feeds.bbci.co.uk/sport/tennis/rss.xml"]
+    urls = ["https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", "https://feeds.bbci.co.uk/sport/tennis/rss.xml"]
     today = datetime.datetime.now().date()
     yesterday = (datetime.datetime.now() - timedelta(days=1)).date()
 
@@ -94,10 +94,9 @@ def calendar():
 def weather():
     print("Getting Todays Weather")
     BASE = "http://api.weatherapi.com/v1"
-    WEATHER_API = os.getenv('WEATHER_API_KEY')
-    method = "/current.json?key=" + WEATHER_API + "&q=Edmonton"
+    weather_api = os.getenv("WEATHER_API")
+    method = "/current.json?key=" + weather_api + "&q=Edmonton"
     url = BASE + method
-    print(url)
     response = requests.get(url)
     print(response.content)
     return
