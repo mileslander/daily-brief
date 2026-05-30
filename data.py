@@ -32,6 +32,7 @@ def parser():
               if pub_date.date() in [yesterday, today]:
                   description = item.find("description")
                   print(description.text)
+      
     return
 
 def calendar():
@@ -45,7 +46,14 @@ def calendar():
   # If there are no (valid) credentials available, let the user log in.
   if not creds or not creds.valid:
     if creds and creds.expired and creds.refresh_token:
-      creds.refresh(Request())
+      import socket
+      # Set socket timeout for credential refresh
+      old_timeout = socket.getdefaulttimeout()
+      socket.setdefaulttimeout(30)
+      try:
+        creds.refresh(Request())
+      finally:
+        socket.setdefaulttimeout(old_timeout)
     else:
       flow = InstalledAppFlow.from_client_secrets_file(
           "credentials.json", SCOPES
@@ -63,8 +71,8 @@ def calendar():
     mountain_time = datetime.timezone(datetime.timedelta(hours=-7))  # MST
     start_of_day = datetime.datetime(today.year, today.month, today.day, tzinfo=mountain_time).isoformat()
     end_of_day = datetime.datetime(today. year, today.month, today.day, 23, 59, 59, tzinfo=mountain_time).isoformat()
-    
-    
+
+
     print("Getting Todays Events")
     events_result = (
         service.events()
@@ -90,12 +98,25 @@ def calendar():
 
   except HttpError as error:
     print(f"An error occurred: {error}")
+  except TimeoutError as error:
+    print(f"Calendar API timeout: {error}")
+  except Exception as error:
+    print(f"Calendar error: {error}")
+
+def hackernews():
+    print("Getting Hacker News")
+    response = requests.get("https://news.ycombinator.com/rss")
+    if response.ok:
+        tree = ET.fromstring(response.content)
+        items = tree.findall("./channel/item/title")
+        for item in items:
+            print(item.text)
 
 def weather():
     print("Getting Todays Weather")
     BASE = "http://api.weatherapi.com/v1"
     weather_api = os.getenv("WEATHER_API")
-    method = "/current.json?key=" + weather_api + "&q=Edmonton"
+    method = "/current.json?key=" + weather_api + "&q=Seattle"
     url = BASE + method
     response = requests.get(url)
     print(response.content)
@@ -103,8 +124,9 @@ def weather():
 
 def main():
     parser()
-    calendar()
+    hackernews()
     weather()
+    calendar()
 
 if __name__ == "__main__":
     main()

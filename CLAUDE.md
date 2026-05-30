@@ -17,3 +17,5 @@ The weather is to be followed by my schedule with each event on a new line in th
 ### News
 
 Finally, include a short summary of the days news. Group stories under bold topics headers, using Telegram markdown bold: *Topic Name*, use title case not all caps. Focus on major stories, tech, and sports. Skip entertainment and celebrity news. Use dashes not bullet points. At most two lines per story. Include a maximum of 10 stories.
+
+Hacker News titles are included as a supplementary tech source. Prefer stories about major product launches, industry events, significant research, or broadly notable tech news. Skip personal essays, opinion pieces, polls, job postings, and niche technical posts. Use your own knowledge to add brief context where the title alone is insufficient. Include at most 3 HN items.
