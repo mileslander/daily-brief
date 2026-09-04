@@ -2,20 +2,21 @@ import requests
 import xml.etree.ElementTree as ET
 import datetime
 from datetime import timedelta
+from zoneinfo import ZoneInfo
 import os
 import os.path
 import sys
-from google.auth.transport.requests import Request
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+
 
 def parser():
     print("Getting Todays News")
     urls = ["https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml", "https://feeds.bbci.co.uk/sport/tennis/rss.xml"]
-    today = datetime.datetime.now().date()
-    yesterday = (datetime.datetime.now() - timedelta(days=1)).date()
+    now = datetime.datetime.now(ZoneInfo("America/Edmonton"))
+    today = now.date()
+    yesterday = (now - timedelta(days=1)).date()
 
     for url in urls:
       response = requests.get(url)
@@ -38,54 +39,24 @@ def parser():
 
 def calendar():
   SCOPES = ["https://www.googleapis.com/auth/calendar.readonly"]
-  creds = None
-  # The file token.json stores the user's access and refresh tokens, and is
-  # created automatically when the authorization flow completes for the first
-  # time.
-  if os.path.exists("token.json"):
-    creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-  # If there are no (valid) credentials available, let the user log in.
-  if not creds or not creds.valid:
-    try:
-      if creds and creds.expired and creds.refresh_token:
-        import socket
-        # Set socket timeout for credential refresh
-        old_timeout = socket.getdefaulttimeout()
-        socket.setdefaulttimeout(30)
-        try:
-          creds.refresh(Request())
-        finally:
-          socket.setdefaulttimeout(old_timeout)
-      elif sys.stdin.isatty():
-        flow = InstalledAppFlow.from_client_secrets_file(
-            "credentials.json", SCOPES
-        )
-        creds = flow.run_local_server(port=0)
-      else:
-        print("Calendar error: token invalid and no interactive terminal available to re-authorize. Run `python3 data.py` locally to re-authorize.")
-        return
-      # Save the credentials for the next run
-      with open("token.json", "w") as token:
-        token.write(creds.to_json())
-    except Exception as error:
-      print(f"Calendar auth error: {error}")
-      return
+  
+  creds = Credentials.from_service_account_file("service-account.json", scopes=SCOPES)
 
   try:
     service = build("calendar", "v3", credentials=creds)
 
     # Call the Calendar API
-    today = datetime.date.today()
-    mountain_time = datetime.timezone(datetime.timedelta(hours=-7))  # MST
+    mountain_time = ZoneInfo("America/Edmonton")
+    today = datetime.datetime.now(mountain_time).date()
     start_of_day = datetime.datetime(today.year, today.month, today.day, tzinfo=mountain_time).isoformat()
-    end_of_day = datetime.datetime(today. year, today.month, today.day, 23, 59, 59, tzinfo=mountain_time).isoformat()
+    end_of_day = datetime.datetime(today.year, today.month, today.day, 23, 59, 59, tzinfo=mountain_time).isoformat()
 
 
     print("Getting Todays Events")
     events_result = (
         service.events()
         .list(
-            calendarId="primary",
+            calendarId="mlander@ualberta.ca",
             timeMin=start_of_day,
             timeMax=end_of_day,
             singleEvents=True,

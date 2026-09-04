@@ -9,6 +9,7 @@
 # Sensitive credentials
 token.json
 credentials.json
+service-account.json
 
 # Data files
 rss.txt
