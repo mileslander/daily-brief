@@ -8,7 +8,7 @@ Data is aggregated from the following sources into a .txt file.
 
 ### News
 
-Collects news from [The New York Times RSS Feeds](https://www.nytimes.com/rss) and [BBC Tennis](https://feeds.bbci.co.uk/sport/tennis/rss.xml). Filters stories by publications date, within the last 24 hours, and extracts their descriptions.
+Collects news from [The New York Times RSS Feeds](https://www.nytimes.com/rss), [BBC Tennis](https://feeds.bbci.co.uk/sport/tennis/rss.xml) and [Hacker News]("https://news.ycombinator.com/rss"). Filters stories by publications date, within the last 24 hours, and extracts their descriptions.
 
 ### Schedule
 
