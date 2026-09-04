@@ -4,6 +4,7 @@ import datetime
 from datetime import timedelta
 import os
 import os.path
+import sys
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -45,23 +46,30 @@ def calendar():
     creds = Credentials.from_authorized_user_file("token.json", SCOPES)
   # If there are no (valid) credentials available, let the user log in.
   if not creds or not creds.valid:
-    if creds and creds.expired and creds.refresh_token:
-      import socket
-      # Set socket timeout for credential refresh
-      old_timeout = socket.getdefaulttimeout()
-      socket.setdefaulttimeout(30)
-      try:
-        creds.refresh(Request())
-      finally:
-        socket.setdefaulttimeout(old_timeout)
-    else:
-      flow = InstalledAppFlow.from_client_secrets_file(
-          "credentials.json", SCOPES
-      )
-      creds = flow.run_local_server(port=0)
-    # Save the credentials for the next run
-    with open("token.json", "w") as token:
-      token.write(creds.to_json())
+    try:
+      if creds and creds.expired and creds.refresh_token:
+        import socket
+        # Set socket timeout for credential refresh
+        old_timeout = socket.getdefaulttimeout()
+        socket.setdefaulttimeout(30)
+        try:
+          creds.refresh(Request())
+        finally:
+          socket.setdefaulttimeout(old_timeout)
+      elif sys.stdin.isatty():
+        flow = InstalledAppFlow.from_client_secrets_file(
+            "credentials.json", SCOPES
+        )
+        creds = flow.run_local_server(port=0)
+      else:
+        print("Calendar error: token invalid and no interactive terminal available to re-authorize. Run `python3 data.py` locally to re-authorize.")
+        return
+      # Save the credentials for the next run
+      with open("token.json", "w") as token:
+        token.write(creds.to_json())
+    except Exception as error:
+      print(f"Calendar auth error: {error}")
+      return
 
   try:
     service = build("calendar", "v3", credentials=creds)
@@ -116,7 +124,7 @@ def weather():
     print("Getting Todays Weather")
     BASE = "http://api.weatherapi.com/v1"
     weather_api = os.getenv("WEATHER_API")
-    method = "/current.json?key=" + weather_api + "&q=Seattle"
+    method = "/current.json?key=" + weather_api + "&q=Edmonton"
     url = BASE + method
     response = requests.get(url)
     print(response.content)
